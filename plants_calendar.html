@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сад и огород — календарь</title>
+  <style>
+    :root {
+      --bg: #0b1324;
+      --panel: #111a30;
+      --muted: #8ea0c4;
+      --text: #e7ecfa;
+      --accent: #57a6ff;
+      --grid: #22314f;
+      --seed: #34d399;
+      --plant: #2dd4bf;
+      --fert: #fbbf24;
+      --pest: #f472b6;
+      --tree: #d97757;
+      --house: #7dd3fc;
+      --lawn: #86efac;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at 20% 0%, #17264a, var(--bg) 40%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px 24px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: linear-gradient(180deg, #122041, var(--panel));
+      border: 1px solid var(--grid);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    button {
+      border: 1px solid #2a3d64;
+      background: #17274a;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { border-color: var(--accent); }
+    .weekday, .day {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .weekday div {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 6px 0;
+    }
+    .cell {
+      border: 1px solid var(--grid);
+      border-radius: 10px;
+      min-height: 100px;
+      padding: 6px;
+      background: rgba(10, 18, 38, 0.3);
+    }
+    .cell.empty { background: transparent; border-color: transparent; }
+    .date {
+      font-size: 12px;
+      color: #bfd0ef;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .event {
+      font-size: 11px;
+      border-radius: 8px;
+      padding: 4px 6px;
+      margin-bottom: 4px;
+      line-height: 1.25;
+      color: #081227;
+      font-weight: 700;
+    }
+    .seed { background: var(--seed); }
+    .plant { background: var(--plant); }
+    .fert { background: var(--fert); }
+    .pest { background: var(--pest); }
+    .tree { background: var(--tree); }
+    .house { background: var(--house); }
+    .lawn { background: var(--lawn); }
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+    }
+    .upcoming-item {
+      border-left: 4px solid var(--grid);
+      padding: 8px 10px;
+      background: rgba(11, 20, 41, 0.45);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .upcoming-date {
+      font-weight: 700;
+      color: #cde0ff;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.35;
+    }
+    code {
+      background: #0c1730;
+      border: 1px solid #283c67;
+      border-radius: 6px;
+      padding: 1px 5px;
+      color: #cce0ff;
+    }
+    @media (max-width: 900px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <div class="header">
+        <div class="title" id="monthTitle"></div>
+        <div class="btns">
+          <button id="prevBtn">← Назад</button>
+          <button id="todayBtn">Сегодня</button>
+          <button id="nextBtn">Вперёд →</button>
+        </div>
+      </div>
+      <div class="weekday">
+        <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+      </div>
+      <div class="day" id="calendarGrid"></div>
+    </section>
+
+    <aside class="card">
+      <h3>Ближайшие работы</h3>
+      <div id="upcoming"></div>
+      <div class="legend">
+        <div><span class="dot" style="background: var(--seed)"></span>Рассада</div>
+        <div><span class="dot" style="background: var(--plant)"></span>Высадка</div>
+        <div><span class="dot" style="background: var(--fert)"></span>Удобрения</div>
+        <div><span class="dot" style="background: var(--pest)"></span>Вредители</div>
+        <div><span class="dot" style="background: var(--tree)"></span>Деревья</div>
+        <div><span class="dot" style="background: var(--house)"></span>Парник</div>
+        <div><span class="dot" style="background: var(--lawn)"></span>Газон</div>
+      </div>
+      <div class="hint">
+        Повторяющиеся события генерируются до <code>2100</code> из массива <code>recurringRules</code>; разовые — в <code>oneOffEvents</code>. Даты ориентировочные для Минской области.
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    /** Ежегодные правила (месяц 1–12, день 1–31). Дублируются каждый год с CALENDAR_START_YEAR по CALENDAR_END_YEAR включительно. */
+    const recurringRules = [
+      { month: 3, day: 1, label: "План: семена, рассадный график, парник", type: "seed" },
+      { month: 3, day: 15, label: "Рассада: томат, перец (дом/парочное окно)", type: "seed" },
+      { month: 4, day: 1, label: "Рассада: капуста ранняя, лук, сельдерей по плану", type: "seed" },
+      { month: 4, day: 10, label: "Газон: первая подкормка после оттаивания почвы", type: "lawn" },
+      { month: 4, day: 20, label: "Рассада: пикировка томатов/полив; проветривание парника", type: "seed" },
+      { month: 5, day: 5, label: "Закалка рассады на улице (при погоде)", type: "plant" },
+      { month: 5, day: 25, label: "Высадка в парник: томат, перец (ориентир Минская обл.)", type: "plant" },
+      { month: 5, day: 25, label: "После высадки: осмотр на вредителей, ловушки", type: "pest" },
+      { month: 6, day: 5, label: "Открытый грунт: теплолюбивые после заморозков", type: "plant" },
+      { month: 6, day: 10, label: "Овощи: 1-я подкормка по фазе роста", type: "fert" },
+      { month: 7, day: 1, label: "Профилактика вредителей овощей (осмотр, точечная обработка)", type: "pest" },
+      { month: 7, day: 15, label: "Овощи: 2-я подкормка; кальций при завязи плодов", type: "fert" },
+      { month: 7, day: 15, label: "Плодовые: летняя прореживающая обрезка при загущении", type: "tree" },
+      { month: 7, day: 20, label: "Профилактика грибков и вредителей (проветривание, нижняя листва)", type: "pest" },
+      { month: 8, day: 5, label: "Долгоплодные/бахчевые: доп. подкормка при необходимости", type: "fert" },
+      { month: 8, day: 25, label: "Фитофтора: контроль, снятие поражённого, режим полива", type: "pest" },
+      { month: 9, day: 1, label: "Газон: осенняя подкормка / подсев оголённых мест", type: "lawn" },
+      { month: 10, day: 15, label: "Парник: уборка, при необходимости дезинфекция каркаса/плёнки", type: "house" },
+      { month: 2, day: 25, label: "Плодовые: зимняя/ранневесенняя обрезка (санитарная + формирующая)", type: "tree" }
+    ];
+
+    const oneOffEvents = [];
+
+    const CALENDAR_START_YEAR = 2026;
+    const CALENDAR_END_YEAR = 2100;
+
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function buildEvents() {
+      const out = [];
+      for (let y = CALENDAR_START_YEAR; y <= CALENDAR_END_YEAR; y++) {
+        for (const r of recurringRules) {
+          const d = new Date(y, r.month - 1, r.day);
+          if (d.getFullYear() !== y || d.getMonth() !== r.month - 1 || d.getDate() !== r.day) continue;
+          out.push({
+            date: `${y}-${pad2(r.month)}-${pad2(r.day)}`,
+            label: r.label,
+            type: r.type
+          });
+        }
+      }
+      for (const e of oneOffEvents) {
+        out.push({ ...e });
+      }
+      return out;
+    }
+
+    const events = buildEvents();
+
+    const monthRu = [
+      "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+      "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+    ];
+
+    const titleEl = document.getElementById("monthTitle");
+    const gridEl = document.getElementById("calendarGrid");
+    const upcomingEl = document.getElementById("upcoming");
+
+    let current = new Date();
+    current = new Date(current.getFullYear(), current.getMonth(), 1);
+
+    function fmtDate(iso) {
+      const [y, m, d] = iso.split("-");
+      return `${d}.${m}.${y}`;
+    }
+
+    function eventsByDate() {
+      const map = new Map();
+      for (const e of events) {
+        if (!map.has(e.date)) map.set(e.date, []);
+        map.get(e.date).push(e);
+      }
+      return map;
+    }
+
+    function renderUpcoming() {
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+      const next = sorted.filter(e => e.date >= todayIso).slice(0, 8);
+      const list = next.length ? next : sorted.slice(-8);
+
+      upcomingEl.innerHTML = list.map(e => `
+        <div class="upcoming-item" style="border-left-color: var(--${e.type});">
+          <span class="upcoming-date">${fmtDate(e.date)}</span>
+          ${e.label}
+        </div>
+      `).join("");
+    }
+
+    function render() {
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      titleEl.textContent = `${monthRu[month]} ${year}`;
+
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const start = (firstDay.getDay() + 6) % 7;
+      const map = eventsByDate();
+
+      const cells = [];
+      for (let i = 0; i < start; i++) cells.push('<div class="cell empty"></div>');
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const dayEvents = map.get(iso) || [];
+        cells.push(`
+          <div class="cell">
+            <div class="date">${d}</div>
+            ${dayEvents.map(e => `<div class="event ${e.type}">${e.label}</div>`).join("")}
+          </div>
+        `);
+      }
+
+      while (cells.length % 7 !== 0) cells.push('<div class="cell empty"></div>');
+      gridEl.innerHTML = cells.join("");
+      renderUpcoming();
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      current = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+      render();
+    });
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      render();
+    });
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      const now = new Date();
+      current = new Date(now.getFullYear(), now.getMonth(), 1);
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

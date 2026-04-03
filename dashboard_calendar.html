@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>House Journal Calendar</title>
+  <style>
+    :root {
+      --bg: #0b1324;
+      --panel: #111a30;
+      --muted: #8ea0c4;
+      --text: #e7ecfa;
+      --accent: #57a6ff;
+      --grid: #22314f;
+      --boiler: #f59e0b;
+      --septic: #22c55e;
+      --water: #38bdf8;
+      --service: #a78bfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at 20% 0%, #17264a, var(--bg) 40%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px 24px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: linear-gradient(180deg, #122041, var(--panel));
+      border: 1px solid var(--grid);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .btns { display: flex; gap: 8px; }
+    button {
+      border: 1px solid #2a3d64;
+      background: #17274a;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { border-color: var(--accent); }
+    .weekday, .day {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .weekday div {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 6px 0;
+    }
+    .cell {
+      border: 1px solid var(--grid);
+      border-radius: 10px;
+      min-height: 100px;
+      padding: 6px;
+      background: rgba(10, 18, 38, 0.3);
+    }
+    .cell.empty { background: transparent; border-color: transparent; }
+    .date {
+      font-size: 12px;
+      color: #bfd0ef;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .event {
+      font-size: 11px;
+      border-radius: 8px;
+      padding: 4px 6px;
+      margin-bottom: 4px;
+      line-height: 1.25;
+      color: #081227;
+      font-weight: 700;
+    }
+    .boiler { background: var(--boiler); }
+    .septic { background: var(--septic); }
+    .water { background: var(--water); }
+    .service { background: var(--service); }
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+    }
+    .upcoming-item {
+      border-left: 4px solid var(--grid);
+      padding: 8px 10px;
+      background: rgba(11, 20, 41, 0.45);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .upcoming-date {
+      font-weight: 700;
+      color: #cde0ff;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.35;
+    }
+    code {
+      background: #0c1730;
+      border: 1px solid #283c67;
+      border-radius: 6px;
+      padding: 1px 5px;
+      color: #cce0ff;
+    }
+    @media (max-width: 900px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <div class="header">
+        <div class="title" id="monthTitle"></div>
+        <div class="btns">
+          <button id="prevBtn">← Назад</button>
+          <button id="todayBtn">Сегодня</button>
+          <button id="nextBtn">Вперёд →</button>
+        </div>
+      </div>
+      <div class="weekday">
+        <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+      </div>
+      <div class="day" id="calendarGrid"></div>
+    </section>
+
+    <aside class="card">
+      <h3>Ближайшие события</h3>
+      <div id="upcoming"></div>
+      <div class="legend">
+        <div><span class="dot" style="background: var(--boiler)"></span>Котел</div>
+        <div><span class="dot" style="background: var(--septic)"></span>Септик</div>
+        <div><span class="dot" style="background: var(--water)"></span>Вода</div>
+        <div><span class="dot" style="background: var(--service)"></span>Сервис</div>
+      </div>
+      <div class="hint">
+        Для обновления дат редактируйте массив <code>events</code> в этом файле.
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const events = [
+      { date: "2026-04-18", label: "Фильтр воды: префильтры + постфильтр", type: "water" },
+      { date: "2026-09-01", label: "Котел: ежегодное обслуживание", type: "boiler" },
+      { date: "2027-03-24", label: "Септик: плановая чистка", type: "septic" },
+      { date: "2027-10-18", label: "Фильтр воды: замена мембраны", type: "water" },
+      { date: "2025-10-18", label: "Фильтр воды: выполнена полная замена", type: "service" }
+    ];
+
+    const monthRu = [
+      "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+      "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+    ];
+
+    const titleEl = document.getElementById("monthTitle");
+    const gridEl = document.getElementById("calendarGrid");
+    const upcomingEl = document.getElementById("upcoming");
+
+    let current = new Date();
+    current = new Date(current.getFullYear(), current.getMonth(), 1);
+
+    function fmtDate(iso) {
+      const [y, m, d] = iso.split("-");
+      return `${d}.${m}.${y}`;
+    }
+
+    function eventsByDate() {
+      const map = new Map();
+      for (const e of events) {
+        if (!map.has(e.date)) map.set(e.date, []);
+        map.get(e.date).push(e);
+      }
+      return map;
+    }
+
+    function renderUpcoming() {
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+      const next = sorted.filter(e => e.date >= todayIso).slice(0, 8);
+      const list = next.length ? next : sorted.slice(-8);
+
+      upcomingEl.innerHTML = list.map(e => `
+        <div class="upcoming-item" style="border-left-color: var(--${e.type});">
+          <span class="upcoming-date">${fmtDate(e.date)}</span>
+          ${e.label}
+        </div>
+      `).join("");
+    }
+
+    function render() {
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      titleEl.textContent = `${monthRu[month]} ${year}`;
+
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const start = (firstDay.getDay() + 6) % 7; // Monday-based
+      const map = eventsByDate();
+
+      const cells = [];
+      for (let i = 0; i < start; i++) cells.push('<div class="cell empty"></div>');
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const dayEvents = map.get(iso) || [];
+        cells.push(`
+          <div class="cell">
+            <div class="date">${d}</div>
+            ${dayEvents.map(e => `<div class="event ${e.type}">${e.label}</div>`).join("")}
+          </div>
+        `);
+      }
+
+      while (cells.length % 7 !== 0) cells.push('<div class="cell empty"></div>');
+      gridEl.innerHTML = cells.join("");
+      renderUpcoming();
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      current = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+      render();
+    });
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      render();
+    });
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      const now = new Date();
+      current = new Date(now.getFullYear(), now.getMonth(), 1);
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
