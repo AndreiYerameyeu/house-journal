@@ -19,6 +19,7 @@
       --tree: #d97757;
       --house: #7dd3fc;
       --lawn: #86efac;
+      --vine: #c084fc;
     }
     * { box-sizing: border-box; }
     body {
@@ -107,6 +108,7 @@
     .tree { background: var(--tree); }
     .house { background: var(--house); }
     .lawn { background: var(--lawn); }
+    .vine { background: var(--vine); }
     .legend {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -187,6 +189,7 @@
         <div><span class="dot" style="background: var(--tree)"></span>Деревья</div>
         <div><span class="dot" style="background: var(--house)"></span>Парник</div>
         <div><span class="dot" style="background: var(--lawn)"></span>Газон</div>
+        <div><span class="dot" style="background: var(--vine)"></span>Виноград</div>
       </div>
       <div class="hint">
         Повторяющиеся события генерируются до <code>2100</code> из массива <code>recurringRules</code>; разовые — в <code>oneOffEvents</code>. Даты ориентировочные для Минской области.
@@ -201,20 +204,28 @@
       { month: 3, day: 15, label: "Рассада: томат, перец (дом/парочное окно)", type: "seed" },
       { month: 4, day: 1, label: "Рассада: капуста ранняя, лук, сельдерей по плану", type: "seed" },
       { month: 4, day: 10, label: "Газон: первая подкормка после оттаивания почвы", type: "lawn" },
+      { month: 4, day: 15, label: "Виноград: снятие укрытия (при отсутствии заморозков); обработка 3% купоросом", type: "vine" },
+      { month: 4, day: 22, label: "Виноград: корневая подкормка до цветения (органические настои)", type: "fert" },
       { month: 4, day: 20, label: "Рассада: пикировка томатов/полив; проветривание парника", type: "seed" },
       { month: 5, day: 5, label: "Закалка рассады на улице (при погоде)", type: "plant" },
+      { month: 5, day: 25, label: "Виноград: пасынкование и подвязка; перед цветением — медь (милдью) и сера (оидиум)", type: "pest" },
       { month: 5, day: 25, label: "Высадка в парник: томат, перец (ориентир Минская обл.)", type: "plant" },
       { month: 5, day: 25, label: "После высадки: осмотр на вредителей, ловушки", type: "pest" },
       { month: 6, day: 5, label: "Открытый грунт: теплолюбивые после заморозков", type: "plant" },
       { month: 6, day: 10, label: "Овощи: 1-я подкормка по фазе роста", type: "fert" },
+      { month: 6, day: 18, label: "Виноград: вторая обработка от болезней (~2–3 нед после цветения)", type: "pest" },
       { month: 7, day: 1, label: "Профилактика вредителей овощей (осмотр, точечная обработка)", type: "pest" },
+      { month: 7, day: 22, label: "Виноград: полив при налива гроздей (в засуху ~2×/нед до размягчения ягод)", type: "vine" },
       { month: 7, day: 15, label: "Овощи: 2-я подкормка; кальций при завязи плодов", type: "fert" },
       { month: 7, day: 15, label: "Плодовые: летняя прореживающая обрезка при загущении", type: "tree" },
       { month: 7, day: 20, label: "Профилактика грибков и вредителей (проветривание, нижняя листва)", type: "pest" },
       { month: 8, day: 5, label: "Долгоплодные/бахчевые: доп. подкормка при необходимости", type: "fert" },
       { month: 8, day: 25, label: "Фитофтора: контроль, снятие поражённого, режим полива", type: "pest" },
       { month: 9, day: 1, label: "Газон: осенняя подкормка / подсев оголённых мест", type: "lawn" },
+      { month: 9, day: 7, label: "Виноград (Молдова и ср.-поздние): контроль созревания; прекратить полив при размягчении", type: "vine" },
       { month: 10, day: 15, label: "Парник: уборка, при необходимости дезинфекция каркаса/плёнки", type: "house" },
+      { month: 11, day: 3, label: "Виноград: осенняя обрезка после листопада (или весной до сокодвижения)", type: "vine" },
+      { month: 11, day: 12, label: "Виноград: обработка перед укрытием; укрытие лозы на зиму", type: "vine" },
       { month: 2, day: 25, label: "Плодовые: зимняя/ранневесенняя обрезка (санитарная + формирующая)", type: "tree" }
     ];
 
